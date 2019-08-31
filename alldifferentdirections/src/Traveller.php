@@ -23,10 +23,9 @@ class Traveller
         $destinations = [];
         foreach ($trips as $trip) {
             $tripData = explode(' ', $trip);
-            list ($x, $y, $_, $angle) = $tripData;
             $traveller = new Traveller();
-            $traveller->setPoint(new Point($x, $y));
-            $traveller->setAngle($angle);
+            $traveller->setPoint(new Point($tripData[0], $tripData[1]));
+            $traveller->setAngle($tripData[3]);
             $commandPairs = [];
             for ($i = 4; $i < count($tripData); $i = $i + 2) {
                 $commandPairs[] = $tripData[$i] . ' ' . $tripData[$i + 1];
@@ -51,7 +50,7 @@ class Traveller
                 case self::COMMAND_WALK:
                     $this->walk((float) $argument);
                     break;
-                case self::COMMAND_TURN;
+                case self::COMMAND_TURN:
                     $this->turn((float) $argument);
                     break;
             }
@@ -104,11 +103,11 @@ class Traveller
 
         $averageX = array_reduce($points, function (float $carry, Point $point) {
                 return $carry + $point->x;
-            }, 0.0) / count($points);
+        }, 0.0) / count($points);
 
         $averageY = array_reduce($points, function (float $carry, Point $point) {
                 return $carry + $point->y;
-            }, 0.0) / count($points);
+        }, 0.0) / count($points);
 
         return new Point($averageX, $averageY);
     }
