@@ -8,51 +8,110 @@ use Rnix\Traveller\Traveller;
 
 class TravellerTest extends TestCase
 {
-    /*
-    public function testGetFinalDestination()
+    /**
+     * @param array $trips
+     * @param float $expectedX
+     * @param float $expectedY
+     * @param float $expectedWorstDistance
+     *
+     * @dataProvider analyzeTripsDataProvider
+     */
+    public function testAnalyzeTrips(array $trips, float $expectedX, float $expectedY, float $expectedWorstDistance)
+    {
+        list ($actualX, $actualY, $actualWorstDistance) = Traveller::analyzeTrips($trips);
+        $this->assertEqualsWithDelta($expectedX, $actualX, 0.001);
+        $this->assertEqualsWithDelta($expectedY, $actualY, 0.001);
+        $this->assertEqualsWithDelta($expectedWorstDistance, $actualWorstDistance, 0.001);
+    }
+
+    public function analyzeTripsDataProvider()
+    {
+        return [
+            [
+                [
+                    '87.342 34.30 start 0 walk 10.0',
+                    '2.6762 75.2811 start -45.0 walk 40 turn 40.0 walk 60',
+                    '58.518 93.508 start 270 walk 50 turn 90 walk 40 turn 13 walk 5',
+                ],
+                97.1547,
+                40.2334,
+                7.63097,
+            ],
+            [
+                [
+                    '30 40 start 90 walk 5',
+                    '40 50 start 180 walk 10 turn 90 walk 5',
+                ],
+                30,
+                45,
+                0,
+            ],
+        ];
+    }
+
+    /**
+     * @param Point $startPoint
+     * @param float $startAngle
+     * @param array $commands
+     * @param Point $expected
+     *
+     * @dataProvider getFinalDestinationDataProvider
+     */
+    public function testGetFinalDestination(Point $startPoint, float $startAngle, array $commands, Point $expected)
     {
         $traveller = new Traveller();
-        $start = new Point(87.342, 34.30);
-        $commands = [
-            'start 0',
-            'walk 10.0',
-        ];
-        $expectedPoint = new Point(1.1, 3.2);
-        $actualPoint = $traveller->getFinalDestination($start, $commands);
-        $this->assertEquals($expectedPoint, $actualPoint);
+        $traveller->setPoint($startPoint);
+        $traveller->setAngle($startAngle);
+        $actualPoint = $traveller->getFinalDestination($commands);
+        $this->assertEqualsWithDelta($expected->x, $actualPoint->x, 0.001);
+        $this->assertEqualsWithDelta($expected->y, $actualPoint->y, 0.001);
     }
 
     public function getFinalDestinationDataProvider()
     {
         return [
+            // 87.342 34.30 start 0 walk 10.0
             [
-                97.342,
-                34.30,
-                87.342,
-                34.30,
-                ['start 0', 'walk 10.0',],
+                new Point(87.342, 34.30),
+                0,
+                ['walk 10.0'],
+                new Point(97.342, 34.30),
             ],
+            // 2.6762 75.2811 start -45.0 walk 40 turn 40.0 walk 60
             [
-                87.342,
-                44.30,
-                87.342,
-                34.30,
-                ['start 90', 'walk 10.0',],
+                new Point(2.6762, 75.2811),
+                -45.0,
+                ['walk 40', 'turn 40.0', 'walk 60'], // (30.9605, 46,9968);
+                new Point(90.7322, 41.7675),
             ],
+            // 58.518 93.508 start 270 walk 50 turn 90 walk 40 turn 13 walk 5
             [
-                87.342 + 0.137073546,
-                34.30 + 0.137073546,
-                87.342,
-                34.30,
-                ['start 45', 'walk 10.0',],
+                new Point(58.518, 93.508),
+                270,
+                ['walk 50', 'turn 90', 'walk 40', 'turn 13', 'walk 5'], // (58.518, 43.508); (98.518, 43.508);
+                new Point(103.3899, 44.6328),
+            ],
+            // 30 40 start 90 walk 5
+            [
+                new Point(30, 40),
+                90,
+                ['walk 5'],
+                new Point(30, 45),
+            ],
+            // 40 50 start 180 walk 10 turn 90 walk 5
+            [
+                new Point(40, 50),
+                180,
+                ['walk 10', 'turn 90', 'walk 5'], // (30, 50);
+                new Point(30, 45),
             ],
         ];
     }
-    */
 
     /**
      * @param float $degrees
      * @param float $expected
+     *
      * @dataProvider getRadiansFromDegreesDataProvider
      */
     public function testGetRadiansFromDegrees(float $degrees, float $expected)
@@ -82,6 +141,7 @@ class TravellerTest extends TestCase
      * @param $startAngle
      * @param $turnDegrees
      * @param $expectedAngle
+     *
      * @dataProvider turnDataProvider
      */
     public function testTurn($startAngle, $turnDegrees, $expectedAngle)
