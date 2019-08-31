@@ -2,3 +2,4 @@ nbproject
 .idea
 vendor
 .phpunit.result.cache
+example/output.txt
