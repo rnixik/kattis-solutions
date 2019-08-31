@@ -17,7 +17,7 @@ class Traveller
      * @param array $trips array of full string of a trip
      * @return array [average x, average y, worst distance]
      */
-    public static function analyzeTrips(array $trips): array
+    public static function analyzeTrips(array $trips): ?array
     {
         // 2.6762 75.2811 start -45.0 walk 40 turn 40.0 walk 60
         $destinations = [];
